@@ -27,6 +27,7 @@ def dynamicMotionX( t, motionString, total_time, travel_distance, initial_x):
         elif (motionlist[0] == "R"):
             travel_distanceX = 0
 
+
     x = exponentialTimeGraph(total_time, travel_distanceX, current_time, initial_x)
 
 

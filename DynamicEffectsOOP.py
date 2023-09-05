@@ -79,7 +79,7 @@ class DynamicPositionClip:
         x = self.exponentialTimeGraph(clip_duration, image_width - self.frame_width, t, 0)
         y = self.exponentialTimeGraph(clip_duration, image_height - self.frame_height, t, 0)
         return (x, y)
-
+    
 
     def generate_video(self, image_path, clip_duration, output_path):
         clip = ImageClip(image_path).set_duration(clip_duration)
