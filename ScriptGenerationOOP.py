@@ -1,8 +1,10 @@
 import openai
 import os
+from dotenv import load_dotenv
 class ScriptGenerator:
     def __init__(self, engine="gpt-4"):
-        openai.api_key = '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'
+        load_dotenv(dotenv_path='/home/kevin/Desktop/PARSE/VMAC/.env')
+        openai.api_key = os.getenv('OPENAI_API_KEY')
         self.engine = engine
         askCorrectDirectory = input("Confirm that your current directory is /VMAC/? y/n: ")
         if askCorrectDirectory == "y":

@@ -2,7 +2,7 @@ import json
 import os
 from pathlib import Path
 from base64 import b64decode
-
+from dotenv import load_dotenv
 import openai
 
 class ImageCreator:
@@ -11,7 +11,7 @@ class ImageCreator:
         self.image_dir = Path.cwd() / "ImageFiles"
         self.data_dir.mkdir(exist_ok=True)
         self.image_dir.mkdir(parents=True, exist_ok=True)
-        self.api_key = "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"
+        self.api_key = os.getenv('OPENAI_API_KEY')
 
     def create_image(self, prompt):
         response = openai.Image.create(
@@ -21,7 +21,7 @@ class ImageCreator:
             response_format="b64_json",
         )
 
-        file_name = self.data_dir / f"{prompt[:5]}-{response['created']}.json"
+        file_name = self.data_dir / f"{response['created']}.json"
 
         with open(file_name, mode="w", encoding="utf-8") as file:
             json.dump(response, file)
@@ -43,4 +43,4 @@ class ImageCreator:
 if __name__ == "__main__":
 
     image_creator = ImageCreator()
-    print(image_creator.create_image("feet Picture"))
+    print(image_creator.create_image("cars"))

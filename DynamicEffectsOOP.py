@@ -80,16 +80,16 @@ class DynamicPositionClip:
         y = self.exponentialTimeGraph(clip_duration, image_height - self.frame_height, t, 0)
         return (x, y)
     
-
-    def generate_video(self, image_path, clip_duration, output_path):
+    def generate_video(self, image_path, clip_duration, movement_function, output_path=None):
         clip = ImageClip(image_path).set_duration(clip_duration)
         image_width, image_height = clip.size
         bg_clip = ColorClip(size=(self.frame_width, self.frame_height), color=(0, 0, 0)).set_duration(clip_duration)
         
-        #clip = clip.set_position(self.positionTest)
-        clip = clip.set_position(lambda t: self.RtL_mid_expo(t, clip_duration, image_width, image_height))
+        # Use the passed-in movement_function to set the clip's position
+        clip = clip.set_position(lambda t: movement_function(t, clip_duration, image_width, image_height))
         composite = CompositeVideoClip([bg_clip, clip])
-        composite.write_videofile(output_path, fps=self.framerate)
+        return composite
+        #composite.write_videofile(output_path, fps=self.framerate)
 
 if __name__ == '__main__':
     FRAMERATE = 24
@@ -101,4 +101,5 @@ if __name__ == '__main__':
     all_possibilities = ['LtR_TtB_E', 'LtR_TtB_L', 'LtR_BtT_E', 'LtR_BtT_L', 'LtR_T_E', 'LtR_T_L', 'LtR_M_E', 'LtR_M_L', 'LtR_B_E', 'LtR_B_L', 'RtL_TtB_E', 'RtL_TtB_L', 'RtL_BtT_E', 'RtL_BtT_L', 'RtL_T_E', 'RtL_T_L', 'RtL_M_E', 'RtL_M_L', 'RtL_B_E', 'RtL_B_L', 'L_TtB_E', 'L_TtB_L', 'L_BtT_E', 'L_BtT_L', 'L_T_E', 'L_T_L', 'L_M_E', 'L_M_L', 'L_B_E', 'L_B_L', 'C_TtB_E', 'C_TtB_L', 'C_BtT_E', 'C_BtT_L', 'C_T_E', 'C_T_L', 'C_M_E', 'C_M_L', 'C_B_E', 'C_B_L', 'R_TtB_E', 'R_TtB_L', 'R_BtT_E', 'R_BtT_L', 'R_T_E', 'R_T_L', 'R_M_E', 'R_M_L', 'R_B_E', 'R_B_L']
     
     dynamic_clip = DynamicPositionClip(FRAMERATE, BG_WIDTH, BG_HEIGHT)
-    dynamic_clip.generate_video(image_path, clip_duration, output_path)
+    movement_function = dynamic_clip.LtR_T_E  # You can dynamically set this to any other function like dynamic_clip.RtL_M_E
+    dynamic_clip.generate_video(image_path, clip_duration, movement_function)

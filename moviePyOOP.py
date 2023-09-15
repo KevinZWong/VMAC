@@ -1,3 +1,4 @@
+from DynamicEffectsOOP import DynamicPositionClip
 from moviepy.editor import *
 from moviepy.video.fx.all import crop, resize
 from moviepy.video.io.VideoFileClip import VideoFileClip
@@ -14,14 +15,17 @@ from queue import Queue
 from threading import Thread
 
 class VideoGenerator:
-    
+
     def __init__(self):
         self.size = (1080,1920)
         self.font="Lane"
         self.color="White"
         self.bg_color=(0, 0, 0, 0)
-        self.fontsize=25
-        
+        self.fontsize=25   
+        self.framerate = 24
+        self.bg_width = 1080
+        self.bg_height = 1920
+            
     def getFontsize(self):
         return self.fontsize
     def setFontsize(self, initFontsize): 
@@ -135,41 +139,24 @@ class VideoGenerator:
 
     # generates back ground footage based on the inputed times, same for each image
     def generateBackgroundFootageImages(self, imageFiles, total_duration):
-        # Make sure there are images to process
+        dynamic_clip = DynamicPositionClip(self.framerate, self.bg_width, self.bg_height)
+
         if not imageFiles:
             raise ValueError("No images to process")
 
         # Calculate the duration for each image
         image_duration = total_duration / len(imageFiles)
-
-        # Create a list of durations, one for each image
-        durations = [image_duration for _ in imageFiles]
-
-        # Create an ImageSequenceClip, which is a clip made from a sequence of images
-        clip = ImageSequenceClip(imageFiles, durations=durations)
-
-        return clip
-    def generateBackgroundFootageImages(self, imageFiles, total_duration, blur_amount):
-        # Make sure there are images to process
-        if not imageFiles:
-            raise ValueError("No images to process")
-
-        # Calculate the duration for each image
-        image_duration = total_duration / len(imageFiles)
-
+        movement_function = dynamic_clip.LtR_T_E
         clips = []
         for image in imageFiles:
-            # Create an ImageClip, apply pan, zoom and blur effects
-            clip = ImageClip(image, duration=image_duration)
-            clip = (clip.fx(vfx.resize, width=480)  # pan effect
-                        .fx(vfx.resize, height=720)  # zoom effect
-                        .fx(vfx.blur, blur_amount))  # blur effect
-            clips.append(clip)
-
-        # Concatenate all clips
+            clip = dynamic_clip.generate_video(image, image_duration, movement_function)
+            clips.append(clip.set_duration(image_duration))
+        
+        # Concatenate all clips to form a sequence
         final_clip = concatenate_videoclips(clips)
-
         return final_clip
+    
+    
     def combine_audio_files(self, file_list, output_file):
         # Combine the audio files into a single file
         command = ['ffmpeg', '-y']
@@ -227,6 +214,9 @@ class VideoGenerator:
             intervals.append(interval)
             current_time += times[i]
         return intervals
+    
+
+
         '''   
     def add_text_overlay(self ,video_path, text_list, output_path):
         # Load the video file
