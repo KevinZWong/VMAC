@@ -1,12 +1,19 @@
 from ScriptGenerationOOP import ScriptGenerator
 from ScriptProcessingOOP import ScriptProcessing
 from moviePyOOP import VideoGenerator
-from HF_TTS import TextToSpeech
-from ImageGnenerationOOP import ImageCreator
+from HF_TTS import TextToSpeech 
+from ImageUpscalerOOP import ImageSuperResolution
+from ImageGenerationOOP import ImageCreator
 import openai
 import time
-import os
 from moviepy.audio.io.AudioFileClip import AudioFileClip
+from pathlib import Path
+from pathlib import Path
+import os
+import sys
+import importlib.util
+
+#from VALLEX.VALLE_OOP import SpeechGenerator
 
 
 script_gen = ScriptGenerator()
@@ -14,11 +21,12 @@ script_process = ScriptProcessing()
 currentFolder = os.getcwd()
 audioFilePath = currentFolder + "/VoiceFiles/"
 imageFilePath = currentFolder + "/ImageFiles/"
+upscaledImagesPath = currentFolder + "/UpscaledImages/"
 videoFilePath = currentFolder + "/VideoFiles/"
 scriptFilePath = currentFolder +"/scriptFiles/"
 FinishedPath = currentFolder +"/FinishedVideos/"
 data = []
-'''
+
 print("1. Generate One Video")
 print("2. Mass Generation")
 print("---------------------------")
@@ -125,47 +133,56 @@ for i in range(0, len(data)):
     print("Images to Generate: ", len(imageDescription))
     imageFiles = []
     image_creator = ImageCreator()
+    isr = ImageSuperResolution()
     for index ,segment in enumerate(imageDescription):
         description = script_gen.generate_image_description(segment)
         imagePath = image_creator.create_image(description)
         print("Image", index + 1, "Generated")
-        imageFiles.append(imagePath)
+        imagePathList = imagePath.split("/")
+        upscaledImageName = upscaledImagesPath + "US_" + imagePathList[-1]
+        isr.process_image(2, imagePath, upscaledImageName)
+        print("Image", index + 1, "Upscaled")
+        imageFiles.append(upscaledImageName)
+
     # image generation done
     print("Image Generation Done")
     print("Beginning Video Generation")
     VideoGenerator1 = VideoGenerator() 
     AudioFileLengthsList = []
     for i in audioFileNames:
-        audioFileLength = VideoGenerator1.getLengthAudioFile(i)
+        audioFileLength = VideoGenerator1.getLengthAudioFile(i) 
         AudioFileLengthsList.append(audioFileLength)
+        
+
+
 
     print("imageFiles =", imageFiles)
     print("AudioFileLengthsList =", AudioFileLengthsList)
     print("script =", script)
 
-'''
-Title = "cars"
-VideoGenerator1 = VideoGenerator() 
-imageFiles = ['/home/kevin/Desktop/PARSE/VMAC/ImageFiles/1694417835-0.png', '/home/kevin/Desktop/PARSE/VMAC/ImageFiles/1694417848-0.png', '/home/kevin/Desktop/PARSE/VMAC/ImageFiles/1694417862-0.png', '/home/kevin/Desktop/PARSE/VMAC/ImageFiles/1694417875-0.png', '/home/kevin/Desktop/PARSE/VMAC/ImageFiles/1694417887-0.png', '/home/kevin/Desktop/PARSE/VMAC/ImageFiles/1694417899-0.png', '/home/kevin/Desktop/PARSE/VMAC/ImageFiles/1694417914-0.png']
-AudioFileLengthsList = [0.65, 3.41, 4.44, 4.41, 5.12, 1.71, 2.58, 4.87, 3.2, 4.1, 3.07, 9.62, 3.91, 5.0, 4.56]
-script = ['cars ', 'Check this out, cars, right? So, \nwe all know about cars. ', 'They’re cool, they’re fast and they \nget us from point A to \npoint B, right? ', 'But did you know that the \nman who actually invented cruise control \nwas blind? ', 'No shit, his name was Ralph \nTeetor, and he was a mechanical \nengineer who lost ', 'his sight at the age of \nfive. ', 'But man, this guy was smart \nas hell, though. ', 'He invented cruise control in 1945 \nbecause his lawyer, who used to \ndrive him around, ', 'was so unpredictably fast and slow \non the road. ', "He'd speed up when he was \ntalking and slow down when he \nwas listening. ", "That shit gave him car sickness. \nCan y'all believe it? ", 'So Teetor got like "Fuck this \nmotion sickness.", pulled up his mechanical \ngenius pants and ', 'literally invented a solution. I mean \nhow badass is that? ', 'So the next time you’re cruising \ndown the freeway, give a little \nmental high five ', 'to Ralph, the blind inventor who \nmade our road trips a whole \nlot smoother. ']
-
-totalVideolength = 0
-for i in AudioFileLengthsList:
-    totalVideolength += i
-print("Video length:", totalVideolength)
-VideoClip = VideoGenerator1.generateBackgroundFootageImages(imageFiles, totalVideolength )
-print("Video Generated from Images")
-VideoClip = VideoGenerator1.cropVideo(VideoClip)
-print("Video Croped")
-VideoClip = VideoGenerator1.overlay_audio_video(VideoClip,  "/home/kevin/Desktop/PARSE/VMAC/VoiceFiles/" + "Audio" + ".wav")
-print("Audio Added to Video")
-StartEndTImes = VideoGenerator1.ScriptSplitterV2_times(script , AudioFileLengthsList)
-VideoClip = VideoGenerator1.add_text_overlay(VideoClip, StartEndTImes)
-print("Text Overlay Added")
-audio = AudioFileClip(audioFilePath + "Audio" + ".wav")
-if VideoClip.duration > audio.duration:
-    VideoClip = VideoClip.subclip(0, audio.duration)
-VideoClip.write_videofile(FinishedPath + Title + ".mp4", fps=24)
-VideoClip.close()
-print(Title, "sucessfully generated")
+    '''
+    Title = "cars"
+    VideoGenerator1 = VideoGenerator() 
+    imageFiles = ['/home/kevin/Desktop/PARSE/VMAC/ImageFiles/1695767957-0.png', '/home/kevin/Desktop/PARSE/VMAC/ImageFiles/1695767969-0.png', '/home/kevin/Desktop/PARSE/VMAC/ImageFiles/1695767983-0.png', '/home/kevin/Desktop/PARSE/VMAC/ImageFiles/1695767996-0.png', '/home/kevin/Desktop/PARSE/VMAC/ImageFiles/1695768008-0.png', '/home/kevin/Desktop/PARSE/VMAC/ImageFiles/1695768021-0.png', '/home/kevin/Desktop/PARSE/VMAC/ImageFiles/1695768035-0.png']
+    AudioFileLengthsList = [0.65, 7.32, 4.47, 1.86, 5.83, 3.94, 3.88, 4.5, 5.74, 4.31, 2.27, 4.41, 1.77]
+    script = ['cars ', 'Is it not mindbogglingly bonkers how \nquickly cars evolved from those old-fashioned \nhorseless carriages to ', 'these rad feats of engineering that \nlet us get from point A \nto point B ', 'by pressing a piece of steel? ', 'Ok, get this: One ridiculously fascinating \nfact is that the fastest car \nin the world, ', 'the Bugatti Veyron Super Sport, can \ngo up to a speed of \n267.857 mph. ', "That's right, it's not a typing \nerror! Can you bloody believe that? ", "You could cover the freakin' length \nof a football field in less \nthan a second. ", 'Even Usain Bolt, the fastest man \non earth, would look like a \nsnail compared to this badass. ', "It's just nuts to think that \na car – just a bunch \nof metal, rubber ", 'and wires – can achieve such \na thing. ', 'I mean, shit dude, we take \ncars for granted so much, but \nthe reality? ', "They're damn miracles on wheels. "]
+    '''
+    totalVideolength = 0
+    for i in AudioFileLengthsList:
+        totalVideolength += i
+    print("Video length:", totalVideolength)
+    VideoClip = VideoGenerator1.generateBackgroundFootageImages(imageFiles, totalVideolength )
+    print("Video Generated from Images")
+    VideoClip = VideoGenerator1.cropVideo(VideoClip)
+    print("Video Croped")
+    VideoClip = VideoGenerator1.overlay_audio_video(VideoClip,  "/home/kevin/Desktop/PARSE/VMAC/VoiceFiles/" + "Audio" + ".wav")
+    print("Audio Added to Video")
+    StartEndTImes = VideoGenerator1.ScriptSplitterV2_times(script , AudioFileLengthsList)
+    VideoClip = VideoGenerator1.add_text_overlay(VideoClip, StartEndTImes)
+    print("Text Overlay Added")
+    audio = AudioFileClip(audioFilePath + "Audio" + ".wav")
+    if VideoClip.duration > audio.duration:
+        VideoClip = VideoClip.subclip(0, audio.duration)
+    VideoClip.write_videofile(FinishedPath + Title + ".mp4", fps=24)
+    VideoClip.close()
+    print(Title, "sucessfully generated")

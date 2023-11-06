@@ -11,6 +11,7 @@ class DynamicPositionClip:
     
     def exponentialTimeGraph(self, total_time, travel_distance, current_time, initial_x):
         return (travel_distance / total_time**3) * (current_time**3) + initial_x
+    
     def dynamicPosition(self, t, clip_duration, image_width, image_height):
         x = self.exponentialTimeGraph(clip_duration, image_width - self.frame_width, t, 0)
         y = self.exponentialTimeGraph(clip_duration, image_height - self.frame_height, t, 0)

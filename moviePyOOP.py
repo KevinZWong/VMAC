@@ -15,13 +15,12 @@ from queue import Queue
 from threading import Thread
 
 class VideoGenerator:
-
     def __init__(self):
         self.size = (1080,1920)
-        self.font="Lane"
-        self.color="White"
+        self.font="Ubuntu Mono"
+        self.color="Yellow"
         self.bg_color=(0, 0, 0, 0)
-        self.fontsize=25   
+        self.fontsize= 75   
         self.framerate = 24
         self.bg_width = 1080
         self.bg_height = 1920
@@ -165,6 +164,12 @@ class VideoGenerator:
         command += ['-filter_complex', 'concat=n={}:v=0:a=1'.format(len(file_list)), '-vn', output_file]
         subprocess.run(command)
 
+    def make_silence(self, duration, fps):
+        """Create a silent audio clip of the given duration and fps."""
+        silence = AudioClip(lambda t: [0, 0], duration=duration)
+        silence.fps = fps
+        return silence
+
     def overlay_audio_video(self, video_clip, audio_file_path):
         # Load the audio file
         audio = AudioFileClip(audio_file_path)
@@ -178,7 +183,7 @@ class VideoGenerator:
         # If the video is longer than the audio, we need to add silence to the audio
         elif silence_duration > 0:
             # Create a silent audio clip of the required duration
-            silence = AudioArrayClip(np.zeros((int(silence_duration * audio.fps), 2)), fps=audio.fps)
+            silence = self.make_silence(silence_duration, audio.fps)
             
             # Concatenate the original audio with the silence
             audio = concatenate_audioclips([audio, silence])
@@ -187,14 +192,13 @@ class VideoGenerator:
         video_clip = video_clip.set_audio(audio)
 
         return video_clip
-
     def add_text_overlay(self, video_clip, text_list):
         clips = []
 
         for text, start_time, end_time in text_list:
             subclip = video_clip.subclip(start_time, end_time)
             txt_clip = (TextClip(text, fontsize=self.fontsize, color=self.color, transparent=True)
-                        .set_position(('center', 'bottom'))
+                        .set_position(('center', 'center'))
                         .set_start(0)
                         .set_duration(subclip.duration))
             result = CompositeVideoClip([subclip, txt_clip])

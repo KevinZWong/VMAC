@@ -20,6 +20,8 @@ class ScriptGenerator:
                 os.mkdir("FinishedVideos")
             if not(os.path.exists("jsonScriptFiles")):
                 os.mkdir("jsonScriptFiles")
+            if not(os.path.exists("UpscaledImages")):
+                os.mkdir("UpscaledImages")
         else:
             print("Cahnge your file location stuppid")
             quit()
