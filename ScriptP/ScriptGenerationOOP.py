@@ -1,43 +1,22 @@
-import openai
+from openai import OpenAI
 import os
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 from dotenv import load_dotenv
 class ScriptGenerator:
     def __init__(self, engine="gpt-4"):
         load_dotenv(dotenv_path='/home/kevin/Desktop/PARSE/VMAC/.env')
-        openai.api_key = os.getenv('OPENAI_API_KEY')
         self.engine = engine
-        askCorrectDirectory = input("Confirm that your current directory is /VMAC/? y/n: ")
-        if askCorrectDirectory == "y":
-            if not(os.path.exists("ScriptFiles")):
-                os.mkdir("ScriptFiles")
-            if not(os.path.exists("VoiceFiles")):
-                os.mkdir("VoiceFiles")
-            if not(os.path.exists("ImageFiles")):
-                os.mkdir("ImageFiles")
-            if not(os.path.exists("VideoFiles")):
-                os.mkdir("VideoFiles")
-            if not(os.path.exists("FinishedVideos")):
-                os.mkdir("FinishedVideos")
-            if not(os.path.exists("jsonScriptFiles")):
-                os.mkdir("jsonScriptFiles")
-            if not(os.path.exists("UpscaledImages")):
-                os.mkdir("UpscaledImages")
-        else:
-            print("Cahnge your file location stuppid")
-            quit()
 
-        
-        pass
     def generate_topics(self, topic , amount ,max_tokens=4000, temperature=1):
-        prompt = "write a list of " + str(amount) + "intresting topics related to" + topic + ". Respond with just the topics seperated by a comma, no numbers"
+        prompt = f"""Write a list of {amount} interesting topics related to {topic}. 
+        The style of topics is intresting. Respond with just the topics separated 
+        by a comma, no numbers."""
 
-        completion = openai.ChatCompletion.create(model="gpt-4", messages=[{"role": "user", "content": prompt}])
+        completion = client.chat.completions.create(model="gpt-4", messages=[{"role": "user", "content": prompt}])
         return  completion.choices[0].message.content
-        
-    def generate_script(self, topic ,max_tokens=4000, temperature=1):
-        prompt = "I will give you a topic, your job is to write a long paragraph discussing one very specific interesting fact about the topic. The paragraph must be extremely casual. You have explicit orders to curse and must do so once. Your first topic is:"
-        prompt += topic
-        completion = openai.ChatCompletion.create(model="gpt-4", messages=[{"role": "user", "content": prompt}])
+
+    def generate_script(self, prompt ,max_tokens=4000, temperature=1):
+        completion = client.chat.completions.create(model="gpt-4", messages=[{"role": "user", "content": prompt}])
         return  completion.choices[0].message.content
         return response.choices[0].text.strip()
     def generate_image_description(self, segment ,max_tokens=4000, temperature=1):
@@ -76,7 +55,7 @@ Your first sentence is:
         """
         #prompt += ". digital art"
         prompt += segment
-        completion = openai.ChatCompletion.create(model="gpt-4", messages=[{"role": "user", "content": prompt}])
+        completion = client.chat.completions.create(model="gpt-4", messages=[{"role": "user", "content": prompt}])
         return  completion.choices[0].message.content
         return response.choices[0].text.strip()
 

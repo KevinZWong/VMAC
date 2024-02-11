@@ -1,4 +1,4 @@
-from DynamicEffectsOOP import DynamicPositionClip
+from .DynamicEffectsOOP import DynamicPositionClip
 from moviepy.editor import *
 from moviepy.video.fx.all import crop, resize
 from moviepy.video.io.VideoFileClip import VideoFileClip
@@ -17,10 +17,10 @@ from threading import Thread
 class VideoGenerator:
     def __init__(self):
         self.size = (1080,1920)
-        self.font="Ubuntu Mono"
-        self.color="Yellow"
+        self.font= "fonts/theBoldFont.ttf"
+        self.color="white"
         self.bg_color=(0, 0, 0, 0)
-        self.fontsize= 75   
+        self.fontsize= 45  
         self.framerate = 24
         self.bg_width = 1080
         self.bg_height = 1920
@@ -105,57 +105,6 @@ class VideoGenerator:
 
         return trimmed_clip
 
-    # generates back ground footage based on the inputed times, diffrent for each image
-    '''
-
-    def generateBackgroundFootageImages(self, AudioFileLengthsList, imageFiles, transition_time):
-        # Validate inputs
-        if not len(AudioFileLengthsList) == len(imageFiles):
-            raise ValueError("Input lists must have the same length")
-
-        # Create a list of (image file, duration) tuples
-        clips = list(zip(imageFiles, AudioFileLengthsList))
-
-        # Create a sequence of ImageClips
-        sequence = [ImageClip(img).set_duration(dur) for img, dur in clips]
-
-        # Add transitions between clips
-        videos = []
-        for i in range(len(sequence) - 1):
-            clip1 = sequence[i]
-            clip2 = sequence[i+1].crossfadein(transition_time)
-            videos.append(CompositeVideoClip([clip1, clip2.set_start(clip1.duration - transition_time)]))
-        videos.append(sequence[-1]) # append last clip without transition
-
-        # Concatenate the clips into a single video
-        video = concatenate_videoclips(videos)
-        return video
-        video.write_videofile("output.mp4")
-
-        return video
-        
-    '''
-
-    # generates back ground footage based on the inputed times, same for each image
-    def generateBackgroundFootageImages(self, imageFiles, total_duration):
-        dynamic_clip = DynamicPositionClip(self.framerate, self.bg_width, self.bg_height)
-
-        if not imageFiles:
-            raise ValueError("No images to process")
-
-        # Calculate the duration for each image
-        image_duration = total_duration / len(imageFiles)
-        movement_function = dynamic_clip.LtR_T_E
-        clips = []
-        for image in imageFiles:
-            clip = dynamic_clip.generate_video(image, image_duration, movement_function)
-            clips.append(clip.set_duration(image_duration))
-        
-        # Concatenate all clips to form a sequence
-        final_clip = concatenate_videoclips(clips)
-        return final_clip
-    
-    
     def combine_audio_files(self, file_list, output_file):
         # Combine the audio files into a single file
         command = ['ffmpeg', '-y']
@@ -197,10 +146,11 @@ class VideoGenerator:
 
         for text, start_time, end_time in text_list:
             subclip = video_clip.subclip(start_time, end_time)
-            txt_clip = (TextClip(text, fontsize=self.fontsize, color=self.color, transparent=True)
+            txt_clip = (TextClip(text, fontsize=self.fontsize, color=self.color, transparent=True, font = self.font)
                         .set_position(('center', 'center'))
                         .set_start(0)
                         .set_duration(subclip.duration))
+
             result = CompositeVideoClip([subclip, txt_clip])
             clips.append(result)
 
@@ -219,26 +169,6 @@ class VideoGenerator:
             current_time += times[i]
         return intervals
     
-
-
-        '''   
-    def add_text_overlay(self ,video_path, text_list, output_path):
-        # Load the video file
-        video = VideoFileClip(video_path)
-
-        # Iterate through the text list and add text to video clip
-        for text, start_time, end_time in text_list:
-            text_clip = TextClip(text, fontsize=self.fontsize, color=self.color, transparent=True).set_pos('center').set_duration(end_time - start_time).set_start(start_time)
-            video = CompositeVideoClip([video, text_clip])
-
-        # Write the new video file with the added text
-        video.write_videofile(output_path, codec='libx264')
-
-        # Close the video clip
-        video.close()
-
-        return output_path
-    '''
 
 '''        
 def main():

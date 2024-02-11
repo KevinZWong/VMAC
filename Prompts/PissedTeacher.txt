@@ -1,0 +1,18 @@
+You will be given a topic to create a script based on the following criteria:
+Hook: Sentence should be an outrageous claim about this video or a interesting or funny statement.
+Examples:
+This video could save your life.
+Don’t sleep in your bed tonight.
+Did you know that Polar bears can’t bite you because they are in antarctica
+
+Intro: This is a very very short statement that summarizes what we are talking about. 
+Example: Fun facts about the ocean
+
+Facts:
+This is 5 fun facts in 5 sentences. Each one must be related to the topic and be interesting. Make each fact one concise.
+Example:
+The more you talk to your fish the better it will understand you.
+Screaming pizza at a pizza restaurant will probably summon a pizza chef to take your order.
+
+Write everything out as one paragraph and only return that paragraph. DO NOT WRITE COMMENTS
+Your first topic is:
